@@ -1,33 +1,103 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Моё приложение</title>
+<title>TDM SHOOTER 3D</title>
 <style>
-body {
-  background: #101827;
-  color: white;
-  font-family: Arial;
-  text-align: center;
-  padding: 30px;
-}
-h1 { color: #38bdf8; }
-button {
-  background: #2563eb;
-  color: white;
-  border: none;
-  padding: 15px 25px;
-  border-radius: 12px;
-  font-size: 18px;
-}
+body{margin:0;overflow:hidden;background:#101820;font-family:Arial;color:white}
+canvas{display:block}
+#hud{position:fixed;top:12px;left:12px;font-size:18px;text-shadow:2px 2px 3px black}
+#controls{position:fixed;bottom:20px;width:100%;display:flex;justify-content:space-around}
+button{background:#263b50;color:white;border:2px solid #8ab4d8;border-radius:14px;padding:17px;font-size:18px}
+#shoot{background:#a52b2b}
 </style>
 </head>
 <body>
-<h1>🚀 Моё приложение</h1>
-<p>Добро пожаловать!</p>
-<button onclick="alert('Приложение работает!')">
-Нажми меня
-</button>
+<div id="hud">TDM SHOOTER 3D<br>❤️ Здоровье: <span id="hp">100</span><br>🎯 Счёт: <span id="score">0</span></div>
+<div id="controls">
+<button id="left">◀</button>
+<button id="forward">▲</button>
+<button id="right">▶</button>
+<button id="shoot">СТРЕЛЯТЬ</button>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x7896a8);
+const camera=new THREE.PerspectiveCamera(70,innerWidth/innerHeight,.1,100);
+camera.position.set(0,2,7);
+const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(innerWidth,innerHeight);
+document.body.appendChild(renderer.domElement);
+scene.add(new THREE.HemisphereLight(0xffffff,0x445566,2));
+const light=new THREE.DirectionalLight(0xffffff,2);
+light.position.set(4,8,5);scene.add(light);
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(30,30),new THREE.MeshStandardMaterial({color:0x536b55}));
+floor.rotation.x=-Math.PI/2;scene.add(floor);
+function block(x,y,z,sx,sy,sz,color){
+let m=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),new THREE.MeshStandardMaterial({color}));
+m.position.set(x,y,z);scene.add(m);return m;
+}
+block(0,1,-10,20,2,1,0x667788);
+block(-10,1,0,1,2,20,0x667788);
+block(10,1,0,1,2,20,0x667788);
+block(0,1,10,20,2,1,0x667788);
+for(let i=0;i<8;i++)block(Math.random()*14-7,.7,Math.random()*-12,2,1.4,2,0x89765b);
+const enemies=[];
+function enemy(x,z){
+let g=new THREE.Group();
+let body=new THREE.Mesh(new THREE.BoxGeometry(.7,1, .5),new THREE.MeshStandardMaterial({color:0xc52d35}));
+body.position.y=1;g.add(body);
+let head=new THREE.Mesh(new THREE.SphereGeometry(.3,12,12),new THREE.MeshStandardMaterial({color:0xe0b28b}));
+head.position.y=1.8;g.add(head);
+g.position.set(x,0,z);scene.add(g);
+enemies.push({g,hp:2});
+}
+for(let i=0;i<5;i++)enemy(Math.random()*12-6, -Math.random()*8-2);
+let score=0,hp=100;
+let keys={};
+["left","right","forward"].forEach(id=>{
+let b=document.getElementById(id);
+b.onpointerdown=()=>keys[id]=true;
+b.onpointerup=b.onpointerleave=()=>keys[id]=false;
+});
+function shoot(){
+let target=null,best=Infinity;
+enemies.forEach(e=>{
+let d=e.g.position.distanceTo(camera.position);
+if(d<best){best=d;target=e;}
+});
+if(target&&best<13){
+target.hp--;
+if(target.hp<=0){
+scene.remove(target.g);
+enemies.splice(enemies.indexOf(target),1);
+score++;document.getElementById("score").textContent=score;
+enemy(Math.random()*12-6,-Math.random()*8-2);
+}
+}
+}
+document.getElementById("shoot").onclick=shoot;
+function animate(){
+requestAnimationFrame(animate);
+if(keys.left)camera.position.x-=.07;
+if(keys.right)camera.position.x+=.07;
+if(keys.forward)camera.position.z-=.07;
+camera.position.x=Math.max(-8,Math.min(8,camera.position.x));
+camera.position.z=Math.max(-8,Math.min(8,camera.position.z));
+camera.position.y=2;
+camera.lookAt(camera.position.x,2,camera.position.z-5);
+renderer.render(scene,camera);
+}
+animate();
+addEventListener("resize",()=>{
+camera.aspect=innerWidth/innerHeight;
+camera.updateProjectionMatrix();
+renderer.setSize(innerWidth,innerHeight);
+});
+</script>
 </body>
 </html>
+
