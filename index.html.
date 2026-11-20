@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Моё приложение</title>
+<style>
+body {
+  background: #101827;
+  color: white;
+  font-family: Arial;
+  text-align: center;
+  padding: 30px;
+}
+h1 { color: #38bdf8; }
+button {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 15px 25px;
+  border-radius: 12px;
+  font-size: 18px;
+}
+</style>
+</head>
+<body>
+<h1>🚀 Моё приложение</h1>
+<p>Добро пожаловать!</p>
+<button onclick="alert('Приложение работает!')">
+Нажми меня
+</button>
+</body>
+</html>
